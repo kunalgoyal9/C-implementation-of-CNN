@@ -1,9 +1,8 @@
-#include<bits/stdc++.h>
-#include"tensor.h"
-using namespace std;
+#include "layer_t.h"
+
 struct conv_layer
 {
-	string typee = "conv";
+	layer_type type = layer_type::conv;
 	tensor<float> grads_in;
 	tensor<float> in;
 	tensor<float> out;

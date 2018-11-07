@@ -1,6 +1,4 @@
-#include<bits/stdc++.h>
-#include"tensor.h"
-using namespace std;
+#include "layer_t.h"
 
 struct pool_layer_t
 {

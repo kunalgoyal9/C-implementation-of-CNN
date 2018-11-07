@@ -1,7 +1,5 @@
 
-#include<bits/stdc++.h>
-#include"tensor.h"
-using namespace std;
+#include "layer_t.h"
 
 struct relu_layer_t
 {
@@ -27,7 +25,7 @@ struct relu_layer_t
 
 	void activate()
 	{
-		for ( int i = 0; i < in.size.x; i++ )
+		for ( int i = 0; i < in.size.x; i++ )g
 			for ( int j = 0; j < in.size.y; j++ )
 				for ( int z = 0; z < in.size.z; z++ )
 				{
