@@ -1,24 +1,24 @@
 #include<bits/stdc++.h>
 #include"tensor.h"
 using namespace std;
-struct conv_layer
+
+struct pool_layer_t
 {
-	string typee = "conv";
-	tensor<float> grads_in;
-	tensor<float> in;
-	tensor<float> out;
-	std::vector<tensor<float>> filters;
+	layer_type type = layer_type::pool;
+	tensor_t<float> grads_in;
+	tensor_t<float> in;
+	tensor_t<float> out;
 	uint16_t stride;
 	uint16_t extend_filter;
 
-	conv_layer( uint16_t stride, uint16_t extend_filter, uint16_t number_filters, tdsize in_size )
+	pool_layer_t( uint16_t stride, uint16_t extend_filter, tdsize in_size )
 		:
 		grads_in( in_size.x, in_size.y, in_size.z ),
 		in( in_size.x, in_size.y, in_size.z ),
 		out(
 		(in_size.x - extend_filter) / stride + 1,
 			(in_size.y - extend_filter) / stride + 1,
-			number_filters
+			in_size.z
 		)
 
 	{
@@ -31,24 +31,9 @@ struct conv_layer
 		assert( (float( in_size.y - extend_filter ) / stride + 1)
 				==
 				((in_size.y - extend_filter) / stride + 1) );
-
-		for ( int a = 0; a < number_filters; a++ )
-		{
-			tensor<float> t( extend_filter, extend_filter, in_size.z );
-
-			int maxval = extend_filter * extend_filter * in_size.z;
-
-			for ( int i = 0; i < extend_filter; i++ )
-				for ( int j = 0; j < extend_filter; j++ )
-					for ( int z = 0; z < in_size.z; z++ )
-						t( i, j, z ) = 1.0f / maxval * rand() / float( RAND_MAX );
-			filters.push_back( t );
-		}
-		
-
 	}
 
-	point map_to_input( point out, int z )
+	point_t map_to_input( point_t out, int z )
 	{
 		out.x *= stride;
 		out.y *= stride;
@@ -87,11 +72,11 @@ struct conv_layer
 			0,
 			normalize_range( a / stride, out.size.x, false ),
 			normalize_range( b / stride, out.size.y, false ),
-			(int)filters.size() - 1,
+			(int)out.size.z - 1,
 		};
 	}
 
-	void activate( tensor<float>& in )
+	void activate( tensor_t<float>& in )
 	{
 		this->in = in;
 		activate();
@@ -99,24 +84,22 @@ struct conv_layer
 
 	void activate()
 	{
-		for ( int filter = 0; filter < filters.size(); filter++ )
+		for ( int x = 0; x < out.size.x; x++ )
 		{
-			tensor<float>& filter_data = filters[filter];
-			for ( int x = 0; x < out.size.x; x++ )
+			for ( int y = 0; y < out.size.y; y++ )
 			{
-				for ( int y = 0; y < out.size.y; y++ )
+				for ( int z = 0; z < out.size.z; z++ )
 				{
-					point mapped = map_to_input( { (uint16_t)x, (uint16_t)y, 0 }, 0 );
-					float sum = 0;
+					point_t mapped = map_to_input( { (uint16_t)x, (uint16_t)y, 0 }, 0 );
+					float mval = -FLT_MAX;
 					for ( int i = 0; i < extend_filter; i++ )
 						for ( int j = 0; j < extend_filter; j++ )
-							for ( int z = 0; z < in.size.z; z++ )
-							{
-								float f = filter_data( i, j, z );
-								float v = in( mapped.x + i, mapped.y + j, z );
-								sum += f*v;
-							}
-					out( x, y, filter ) = sum;
+						{
+							float v = in( mapped.x + i, mapped.y + j, z );
+							if ( v > mval )
+								mval = v;
+						}
+					out( x, y, z ) = mval;
 				}
 			}
 		}

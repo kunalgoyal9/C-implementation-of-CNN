@@ -1,3 +1,4 @@
+#include<bits/stdc++.h>
 // point having x,y,z dimensions
 
 struct point{
