@@ -1,11 +1,10 @@
-
 // point having x,y,z dimensions
 
 struct point{
 	int x,y,z;
 	
-	bool operator==(point other){
-		if(this->x == other.x and this->y == other.y and this->z == other.z){
+	bool operator==(point& other){
+		if(this->x == other.x and this->y == other.y and this->z == other.z)	{
 			return true;
 		}
 		else return false;
